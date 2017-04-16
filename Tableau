@@ -6,32 +6,32 @@ master.geometry("600x800")
 top = tk.Frame(master)
 top.pack()
 middle = tk.Frame(master)
-middle.place(rely=.6)
+middle.pack()
 bottom = tk.Frame(master)
-bottom.place(rely=.8)
+bottom.pack()
 
-#c = tk.Canvas(main, width="500", height="300", bg="white",relief="sunken")
-#c.pack()
+#scrollbar = tk.Scrollbar(master)
+#scrollbar.pack(side='right', fill='y')
 
 ############################ DATA ENTRY  ###############################
-
-#t=2
 
 lp=[] #liste des positions
 lt=[] #liste du temps
 
 time=tk.Entry(middle, bg="grey")
 position=tk.Entry(middle, bg="grey")
-time.grid(column=1, row=0)
+time.grid(column=1, row=1)
 time.insert(0, "Base de temps (s)")
-position.grid(column=3, row=0)
+position.grid(column=3, row=1)
 position.insert(0, "Position (rad)")
-empty_ml=tk.Label(middle)
-empty_ml.grid(column=0,row=0, padx=55)
-empty_mc=tk.Label(middle)
-empty_mc.grid(column=2,row=0, padx=55)
-empty_mr=tk.Label(middle)
-empty_mr.grid(column=4,row=0, padx=40)
+empty_mn=tk.Label(middle)
+empty_mn.grid(column=0,row=0)
+empty_mw=tk.Label(middle)
+empty_mw.grid(column=0,row=1)
+empty_mc=tk.Label(middle, width=10)
+empty_mc.grid(column=2,row=1)
+empty_me=tk.Label(middle)
+empty_me.grid(column=4,row=1)
                                                                     
 def clear_timebox(event): 
     time.delete(0, "end")
@@ -67,7 +67,7 @@ def data_entry(event):
 master.bind('<Return>', data_entry)
   
 b_set_bdt = tk.Button(middle,text="Set",width=10,height=1, command=timef)
-b_set_bdt.grid(column=1, row=1, sticky="E")
+b_set_bdt.grid(column=1, row=2, sticky="E")
 
 ############################ CALCULS  ###############################
 lv=[]
@@ -112,33 +112,31 @@ def v_and_a():
     create_line(la,3)
 
 b_enter = tk.Button(bottom,text="Done",width=20,height=4, command=v_and_a)
-b_enter.grid(column=1, row=0)
-empty_bl=tk.Label(bottom, width=30)
-empty_bl.grid(column=0,row=0)
-empty_br=tk.Label(bottom, width=20)
-empty_br.grid(column=2,row=0)
+b_enter.grid(column=1, row=1)
+empty_bn=tk.Label(bottom)
+empty_bn.grid(column=0,row=0)
+empty_bw=tk.Label(bottom)
+empty_bw.grid(column=0,row=1)
+empty_be=tk.Label(bottom)
+empty_be.grid(column=2,row=1)
 
 ############################ TABLE  ###############################
 emptyt0=tk.Label(top)
 emptyt0.grid(column=0,row=1)
-h_t=tk.Entry(top, bg="grey")
+h_t=tk.Label(top, bg="grey", text="Temps(s)", relief="groove", width=16)
 h_t.grid(column=0, row=2)
-h_t.insert(0, "Temps(s)")
-h_p=tk.Entry(top, bg="grey")
+h_p=tk.Label(top, bg="grey", text="Position(rad)", relief="groove", width=16)
 h_p.grid(column=1, row=2)
-h_p.insert(0, "Position(rad)")
-h_v=tk.Entry(top, bg="grey")
+h_v=tk.Label(top, bg="grey", text="Vitesse(rad/s)", relief="groove", width=16)
 h_v.grid(column=2, row=2)
-h_v.insert(0, "Vitesse(rad/s)")
-h_a=tk.Entry(top, bg="grey")
+h_a=tk.Label(top, bg="grey", text="Acceleration(rad/s²)", relief="groove", width=16)
 h_a.grid(column=3, row=2)
-h_a.insert(0, "Acceleration(rad/s²)")
 
 def create_line(l,c):
-    for i in range(len(l)):
-        ti=tk.Entry(top)
+    for i in range(len(l)):       
+        ti=tk.Label(top, width=16, text=float(l[i]), bg="white", relief="ridge")
         ti.grid(column=c, row=int(i+3))
-        ti.insert(0, float(l[i]))
+
 
 ############################ READ CSV  ###############################
 
@@ -271,8 +269,8 @@ def write_csv():
         
 
 
-export = tk.Button(bottom,text="Export",width=20,height=4, command=write_csv)
-export.grid(column=1, row=1)
+export = tk.Button(bottom,text="Export",width=20,height=2, command=write_csv)
+export.grid(column=1, row=2)
 
 ##############################################################
 master.mainloop()
