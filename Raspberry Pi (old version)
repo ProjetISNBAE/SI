@@ -1,0 +1,237 @@
+#==============================================================================
+# Modules
+#==============================================================================
+import RPi.GPIO as GPIO
+import sys
+import time
+
+#==============================================================================
+# Variables
+#==============================================================================
+tour=0
+trou=0
+
+frequence=50
+rapport=5
+
+res=[]
+
+pin_sortie=int(input('Pin de Sortie?'))
+pin_aimant=int(input("Pin de l'ILS?"))
+pin_fourche=int(input('Pin de la fourche?'))
+
+#==============================================================================
+# GPIO Setup
+#==============================================================================
+
+GPIO.setmode(GPIO.BCM)	
+GPIO.setup(pin_sortie, GPIO.OUT)		
+GPIO.setup(pin_aimant, GPIO.IN)
+GPIO.setup(pin_fourche, GPIO.IN)
+
+#==============================================================================
+# Fonctions de Comptage
+#==============================================================================
+
+def fourche():
+    global trou
+    trou=trou+1
+    return trou
+
+def aimant():
+    global tour
+    global trou
+    if trou<20:
+        None
+    else:
+        tour=tour+1
+        trou=0
+        return tour
+
+#==============================================================================
+# Classe position
+#==============================================================================
+
+class position(self, tour, trou):
+    def __init__(self, tour, trou):
+        self.trou=trou
+        self.tour=tour
+        
+    def __repr__(self):
+        return(self.tour+self.trou)
+
+#==============================================================================
+# GPIO Event Detect
+#==============================================================================
+        
+GPIO.add_event_detect(pin_fourche, GPIO.FALLING, bouncetime=10, callback=fourche)
+GPIO.add_event_detect(pin_aimant, GPIO.FALLING, bouncetime=1000, callback=aimant)
+
+#==============================================================================
+# Fonctions Modes de Fonctionnement
+#==============================================================================
+    
+def normal(): #Fonctionnement Normal
+    #Initialisation/Demandes utilisateur
+    trou=0 
+    tour=0
+    position=float(input('Position Finale? (en nombre de tours)'))
+    tour_final=int(position) #nombre de tours entiers
+    trou_final=(position-tour_final)*100 #conversion de la partiedécimale en nombre de trous
+    pwm = GPIO.PWM(pin_sortie, frequence)
+    #Démarrage Moteur
+    pwm.start(rapport)
+    #Détection position finale
+    if tour==tour_final and trou==trou_final:
+        pwm.stop #arrêt Moteur
+        res.append(input('Position finale atteinte?'))
+        restart=input('Recommencer?')
+        if restart=='Non'or restart=='non' or restart==0:
+            analyse_normal(res)
+            print('Résultats analysés!')
+        elif restart=='Oui' or restart=='oui' or restart==1:
+            normal()
+        else:
+            print('Erreur')
+
+def compteur():
+    pwm = GPIO.PWM(pin_sortie, frequence)
+    essais=input("Combien d'essais?")  
+    for i in range(essais):
+        pwm.start(rapport)
+        if tour==1:
+            pwm.stop	
+            print('Nb trous final:', trou)
+            time.sleep(0.5)
+            res.append(trou)
+    restart=input('Recommencer?')
+    if restart=='Non' or restart=='non' or restart==0:
+            analyse_compteur(res)
+            print('Résultats analysés!')
+    elif restart=='Oui' or restart=='oui' or restart==1:
+            compteur()
+   
+def vitesse():
+    
+    print("Donner l'intervalle d'éxpérience.")
+    debut=input('Borne inférieure?')
+    fin=input('Borne supérieure')
+    temps=input('Base de temps?')
+    ecart=input("Ecart d'un pas?")
+    rapport=debut
+    pwm = GPIO.PWM(pin_sortie, frequence)
+    pwm.start(rapport)
+    for i in range(debut, fin+ecart):
+        rapport=rapport+ecart
+        for i in range(3):
+            pos=position(tour,trou)
+            res.append(pos)
+            time.sleep(temps)
+        pwm.changeDutyCylce(rapport)
+    restart=input('Recommencer?')
+    if restart=='Non' or restart=='non' or restart==0:
+            analyse_vitesse(res)
+            print('Résultats analysés!')
+    elif restart=='Oui' or restart=='oui' or restart==1:
+            vitesse()
+#==============================================================================
+# Conversion des Résultats
+#==============================================================================
+           
+def convert_to_int(res):
+    liste=[]
+    for i in range(len(res)):
+        if res[i]=='Oui' or res[i]=='oui' or res[i]==1:
+            liste.append(1)
+        elif res[i]=='Non' or res[i]=='non' or res[i]==0:
+            liste.append(0)
+    return liste
+
+def convert_pos_to_rad(res):
+    liste=[]
+    for i in range(len(res)):
+        rotations=res[i].tour
+        wholes=res[i].trou
+        l
+
+#==============================================================================
+#   Analyse  
+#==============================================================================
+
+def analyse_normal(res):
+    r=open('resultat.csv','a')
+    r.write('Analyse du fonctionnement normal.\n')
+    r.write('Essai n°,')
+    for i in range(len(res)):
+        r.write(str(i+1))
+        r.write(',')
+    r.write('\nPosition finale atteinte?,')
+    for i in range(len(res)):
+        r.write(str(res[i]))
+        r.write(',\n')
+    res=convert_to_int(res)
+    somme=0
+    for i in range(len(res)):
+        somme=somme+res[i]
+    r.write('Somme,')
+    r.write(somme)
+    r.write(',\n')    r.write('Pourcentage de réussite,')
+    r.write(somme*100/len(res))        
+    r.write('\n\n')
+    res=[]
+    
+def analyse_compteur(res):
+    r=open('resultat.csv','a')
+    r.write('Analyse du Test Compteur.\n')
+    r.write('Essai n°,')
+    for i in range(len(res)):
+        r.write(str(i+1))
+        r.write(',')
+    r.write('\nNombre de trous comptés,')
+    for i in range
+(len(res)):
+        r.write(str(res[i]))
+        r.write(',')
+    r.write('\nMoyenne,')
+    somme=0
+    for i in range(len(res)):
+        somme=somme+res[i] 
+    r.write(somme/len(res))
+    r.write('\n\n')
+    res=[]
+    
+
+def analyse_vitesse(res):
+    r=open('resultat.csv','a')
+    r.write('Analyse du Test Vitesse.\n')
+    r.write('Essai n°,')
+    for i in range(len(res)):
+        r.write(str(i+1))
+        r.write(',')
+    r.write('\nPosition,')
+    for i in range(len(res)):
+        r.write(str(res[i]))
+        r.write(',')
+    
+        
+#==============================================================================
+# Choix du Mode
+#==============================================================================
+    
+while True:
+
+    print('Mode de fonctionnement?\n1: Fonctionnement normal\n2: Test Compteur\n3: Test Vitesse\n4: Settings')
+
+    mode=input()
+
+    if mode==1: #Fonctionnement Normal
+        normal()
+    elif mode==2: #Test Compteur
+        compteur()    
+    elif mode==3: #Test Vitesse
+        vitesse()
+    elif mode==4:
+        frequence=float(input('Fréquence?'))
+        rapport=float(input('Rapport Cyclique?'))
+    else:
+        break
